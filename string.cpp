@@ -170,6 +170,20 @@ String::String(String&& other){
 	m_data = other.m_data;
 	m_size = other.m_size;
 	other.m_data = nullptr;
+<<<<<<< HEAD
+=======
+}
+#endif
+
+int main()
+{
+	String aa = "abc";
+	String bb = "edf";
+	printf("aa:%s,%ld\n",aa.c_str(),aa.size());
+	aa = bb;
+	printf("aa:%s,%ld\n",aa.c_str(),aa.size());
+	return 0;
+>>>>>>> a656f10036166ae0fe3396cc9d02672c9b5f28b0
 }
 #endif
 
