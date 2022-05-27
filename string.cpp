@@ -4,18 +4,89 @@
 //
 // Created by wwq on 2022/05/27
 // Last Modified: 2022/05/27 13:28:15
-//
+// 参考:陈硕：https://coolshell.cn/articles/10478.html
 //=====================================================================
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+// 功能:
+//能像int类一样，定义变量，并且支持赋值，赋值
+//能用作为函数的参数类型和返回类型
+//能用作标准库容器的元素类型，即vector/list/deque的value_type.(std::map的key_type是需要更进一步要求)
 
+// 思路：
+// 首先选择数据成员，最简单的String只有一个char*成员变量。好处是容易实现，坏处是某些操作的复杂度
+// 较高(size()会是线性时间)。为了面试时写代码不出错，本文设计的String只有一个char* data_成员。而且
+// 规定invariant如下:一个valid的string对象的data_保证不为NULL。data_以'\0'结尾，以方便配合c语言的str*()系列函数
+// 支持操作，构造，析构，拷贝构造，赋值这几样操作，c++11的移动构造和移动赋值也可以有。
+
+// strlen 函数是一个标准库函数，其作用为计算字符串的长度，但是不包括“\0”在内。
+class String
+{
+public:
+	String()
+		:date_(new char[1])
+	{
+		*date_ = '\0';
+	}
+	String(const char* str)
+		:date_(new char[strlen(str) + 1])
+	{
+		strcpy(date_, str);
+	}
+	String(const String& rhs)
+		:date_(new char[rhs.size() + 1])
+	{
+		strcpy(date_, rhs.c_str());
+	}
+
+	~String()
+	{
+		delete [] date_;
+	}
+
+	String& operator=(String rhs)
+	{
+		swap(rhs);
+		return *this;
+	}
+
+	String(String&& rhs)
+		: date_(rhs.date_)
+	{
+		rhs.date_ = nullptr;
+	}
+
+	String& operator=(String&& rhs)
+	{
+		swap(rhs);
+		return *this;
+	}
+
+	size_t size() const
+	{
+		return strlen(date_);
+	}
+
+	const char* c_str() const
+	{
+		return date_;
+	}
+
+	void swap(String& rhs)
+	{
+		std::swap(date_, rhs.date_);
+	}
+private:
+	char* date_;
+};
+# if 0
 class String
 {
 public:
 	String(const char* str = NULL);//普通构造函数
 	String(const String& other); //拷贝构造函数
-	String(const String&& other);//移动构造函数
+	String(String&& other);//移动构造函数
 	~String(void);//析构函数
 	String &operator =(const String& other);//赋值函数
 
@@ -76,11 +147,20 @@ String& String::operator=(const String& other)
 	return *this;
 }
 
-int main(){
+// 移动构造函数
+String::String(String&& other){
+	m_data = other.m_data;
+	m_size = other.m_size;
+	other.m_data = nullptr;
+}
+#endif
+
+int main()
+{
 	String aa = "abc";
 	String bb = "edf";
-	printf("aa:%s,%d\n",aa.c_str(),aa.length());
+	printf("aa:%s,%ld\n",aa.c_str(),aa.size());
 	aa = bb;
-	printf("aa:%s,%d\n",aa.c_str(),aa.length());
+	printf("aa:%s,%ld\n",aa.c_str(),aa.size());
 	return 0;
 }
